@@ -6,7 +6,7 @@ pragma solidity ^0.6.7;
 
 library MerkleB {
 
-    function recursive(bytes32[] memory elements, bytes32[256] storage defaults)
+    function getMerkleRoot(bytes32[] memory elements, bytes32[256] storage defaults)
         internal view returns (bytes32) {
 
         // compute tree depth
@@ -18,7 +18,6 @@ library MerkleB {
         }
 
         return helper(elements, defaults, 0, pow2, depth);
-
     }
 
     function helper(
@@ -30,26 +29,27 @@ library MerkleB {
 
         internal view returns (bytes32) {
 
-        if (size == 1) {
-            if (li < elements.length) {
-                return elements[li];
-            } else {
-                return defaults[0];
-            }
-        } else {
-
+        if (size != 1) {
             if (li >= elements.length) {
                 return defaults[depth];
+            } else {
+                uint size_ = size / 2;
+                bytes32 left = helper(elements, defaults, li, size_, depth - 1);
+                bytes32 right = helper(elements, defaults, li + size_, size_, depth - 1);
+                bytes memory buf; // don't need to allocate?
+                assembly {
+                    mstore(add(buf, 32), left)
+                    mstore(add(buf, 64), right)
+                }
+                return keccak256(buf);
             }
-
-            uint size_ = size / 2;
-            uint right_li = li + size_;
-            return keccak256(abi.encodePacked(
-                helper(elements, defaults, li, size_, depth - 1) ,
-                helper(elements, defaults, right_li, size_, depth - 1)
-            ));
+        } else {
+            if (li >= elements.length) {
+                return defaults[0];
+            } else {
+                return elements[li];
+            }
         }
-
     }
 
 }

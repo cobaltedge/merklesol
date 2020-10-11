@@ -4,6 +4,7 @@ import "ds-test/test.sol";
 
 import "./MerkleA.sol";
 import "./MerkleB.sol";
+import "./MerkleC.sol";
 import "./Lab.sol";
 
 contract MerkleTest is DSTest {
@@ -28,17 +29,17 @@ contract MerkleTest is DSTest {
         }
     }
 
-    // function test_root_correct2() external {
-    //     bytes32[] memory data = new bytes32[](2);
-    //     data[0] = keccak256(hex"11");
-    //     data[1] = keccak256(hex"22");
-    //     bytes32 r_ = keccak256(abi.encodePacked(
-    //         data[0] ,
-    //         data[1]
-    //     ));
-    //     bytes32 r = Merkle.getMerkleRoot(data, defaults);
-    //     assertTrue(r == r_);
-    // }
+    function test_root_correct2() external {
+        bytes32[] memory data = new bytes32[](2);
+        data[0] = keccak256(hex"11");
+        data[1] = keccak256(hex"22");
+        bytes32 r_ = keccak256(abi.encodePacked(
+            data[0] ,
+            data[1]
+        ));
+        bytes32 r = MerkleA.getMerkleRoot(data, defaults);
+        assertTrue(r == r_);
+    }
 
     // function test_root_correct3() external {
     //     bytes32[] memory data = new bytes32[](3);
@@ -57,7 +58,7 @@ contract MerkleTest is DSTest {
     //         left,
     //         right
     //     ));
-    //     bytes32 r = Merkle.getMerkleRoot(data, defaults);
+    //     bytes32 r = MerkleC.getMerkleRoot(data, defaults);
     //     assertTrue(r == r_);
     // }
 
@@ -78,52 +79,39 @@ contract MerkleTest is DSTest {
     //             keccak256(abi.encodePacked(defaults[0], defaults[0]))
     //         ))
     //     ));
-    //     assertTrue(Merkle.recursive(data, defaults) == r);
-    //     assertTrue(Merkle.getMerkleRoot(data, defaults) == r);
+    //     assertTrue(MerkleC.getMerkleRoot(data, defaults) == r);
     // }
 
-    // function test_root_correct8() external {
-    //     bytes32[] memory data = new bytes32[](8);
-    //     data[0] = keccak256(hex"00");
-    //     data[1] = keccak256(hex"11");
-    //     data[2] = keccak256(hex"22");
-    //     data[3] = keccak256(hex"33");
-    //     data[4] = keccak256(hex"44");
-    //     data[5] = keccak256(hex"55");
-    //     data[6] = keccak256(hex"66");
-    //     data[7] = keccak256(hex"77");
-    //     bytes32 r = keccak256(abi.encodePacked(
-    //         keccak256(abi.encodePacked(
-    //             keccak256(abi.encodePacked(data[0], data[1])),
-    //             keccak256(abi.encodePacked(data[2], data[3]))
-    //         )),
-    //         keccak256(abi.encodePacked(
-    //             keccak256(abi.encodePacked(data[4], data[5])),
-    //             keccak256(abi.encodePacked(data[6], data[7]))
-    //         ))
-    //     ));
-    //     assertTrue(Merkle.recursive(data, defaults) == r);
-    //     assertTrue(Merkle.getMerkleRoot(data, defaults) == r);
-    // }
+    function test_root_correct8() external {
+        bytes32[] memory data = new bytes32[](8);
+        data[0] = keccak256(hex"00");
+        data[1] = keccak256(hex"11");
+        data[2] = keccak256(hex"22");
+        data[3] = keccak256(hex"33");
+        data[4] = keccak256(hex"44");
+        data[5] = keccak256(hex"55");
+        data[6] = keccak256(hex"66");
+        data[7] = keccak256(hex"77");
+        bytes32 r = keccak256(abi.encodePacked(
+            keccak256(abi.encodePacked(
+                keccak256(abi.encodePacked(data[0], data[1])),
+                keccak256(abi.encodePacked(data[2], data[3]))
+            )),
+            keccak256(abi.encodePacked(
+                keccak256(abi.encodePacked(data[4], data[5])),
+                keccak256(abi.encodePacked(data[6], data[7]))
+            ))
+        ));
+        assertTrue(MerkleA.getMerkleRoot(data, defaults) == r);
+    }
 
-    // function test_recursive_gas4096() external {
-    //     bytes32[] memory data = new bytes32[](4096);
-    //     Merkle.recursive(data, defaults);
-    // }
-
-    // function test_gas4096() external {
-    //     bytes32[] memory data = new bytes32[](4096);
-    //     Merkle.getMerkleRoot(data, defaults);
-    // }
-
-    // function test_recursive_gas4097() external {
-    //     bytes32[] memory data = new bytes32[](4097);
-    //     Merkle.recursive(data, defaults);
-    // }
-
-    // function test_gas4097() external {
-    //     bytes32[] memory data = new bytes32[](4097);
-    //     Merkle.getMerkleRoot(data, defaults);
-    // }
+    function test_agas4098() external {
+        bytes32[] memory data = new bytes32[](4098);
+        MerkleA.getMerkleRoot(data, defaults);
+    }
+    function test_bgas4098() external {
+        bytes32[] memory data = new bytes32[](4098);
+        MerkleB.getMerkleRoot(data, defaults);
+    }
 
 }

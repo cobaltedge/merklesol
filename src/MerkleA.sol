@@ -1,6 +1,5 @@
 // efficient merkle trees
-// TODO: test manual common subexpression elimination
-// TODO: check .length cost
+// TODO: manual common subexpression elimination
 
 pragma solidity ^0.6.7;
 
@@ -17,49 +16,40 @@ library MerkleA {
             depth++;
         }
 
-        bool odd = elements.length % 2 == 1;
-        uint cap;
-        if (odd) {
-            cap = (elements.length - 1) / 2;
-        } else {
-            cap = elements.length / 2;
+        bytes memory buf = new bytes(64);
+        bytes32 left; bytes32 right;
+
+        for (uint i = 0; i < elements.length / 2; i++) {
+            left  = elements[2 * i    ];
+            right = elements[2 * i + 1];
+            assembly {
+                mstore(add(buf, 32), left)
+                mstore(add(buf, 64), right)
+            }
+            elements[i] = keccak256(buf);
         }
 
-        for (uint i = 0; i < cap; i++) {
-            elements[i] = keccak256(abi.encodePacked(
-                elements[2 * i    ] ,
-                elements[2 * i + 1]
-            ));
-        }
-
-        uint resume;
-        if (odd) {
-            elements[cap] = keccak256(abi.encodePacked(
-                elements[2 * cap] ,
-                defaults[0]
-            ));
-            resume = cap + 1;
-        } else {
-            resume = cap;
-        }
-
-        for (uint i = resume; i < pow2 / 2; i++) {
+        for (uint i = elements.length; i < pow2 >> 1; i++) {
             elements[i] = defaults[1];
         }
 
         uint diff = (pow2 - elements.length) / 2;
+        uint pow2_ = pow2 >> 1;
         for (uint d = 2; d <= depth; d++) {
-            uint d_ = depth - d;
-            uint pow2_ = 2 ** d_;
-            diff /= 2;
+            pow2_ >>= 1;
+            diff  /= 2;
             uint midpoint = pow2_ - diff;
 
             for (uint i = 0; i < midpoint; i++) {
-                elements[i] = keccak256(abi.encodePacked(
-                    elements[2 * i    ] ,
-                    elements[2 * i + 1]
-                ));
+                left  = elements[2 * i    ];
+                right = elements[2 * i + 1];
+                assembly {
+                    mstore(add(buf, 32), left)
+                    mstore(add(buf, 64), right)
+                }
+                elements[i] = keccak256(buf);
             }
+
             for (uint i = midpoint; i < pow2_; i++) {
                 elements[i] = defaults[d];
             }
